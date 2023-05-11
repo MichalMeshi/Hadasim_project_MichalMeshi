@@ -1,9 +1,9 @@
 var pool = require('./connect2db');
 
 const createTablesInDatabase = async function() {
-    // Create the personaldetails table
+    // Create the personal_details table
     await pool.query(`
-        CREATE TABLE IF NOT EXISTS personaldetails (
+        CREATE TABLE IF NOT EXISTS personal_details (
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
             id INT(11) NOT NULL,
@@ -22,7 +22,7 @@ const createTablesInDatabase = async function() {
             id INT(11) NOT NULL,
             vaccine_manufacturer VARCHAR(255) NOT NULL,
             vaccine_date DATE NOT NULL,
-            FOREIGN KEY(id) REFERENCES personaldetails(id)
+            FOREIGN KEY(id) REFERENCES personal_details(id)
             )`);
 
     // Create the corona_patient table
@@ -31,7 +31,7 @@ const createTablesInDatabase = async function() {
             id INT(11) NOT NULL,
             positive_result_date DATE NOT NULL,
             recovery_date DATE NOT NULL,
-            FOREIGN KEY(id) REFERENCES personaldetails(id)
+            FOREIGN KEY(id) REFERENCES personal_details(id)
             )`);
 
 }

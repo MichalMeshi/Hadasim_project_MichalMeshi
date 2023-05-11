@@ -5,11 +5,17 @@ const closeConnection = require('../models/databaseTables');
 createTablesInDatabase();
 module.exports = (function() {
 
+    /**
+     * function that add personal details to the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function addPersonalDetails(req, res) {
         con.getConnection(function(err,connection) {
             if (err) throw err;
             console.log("Connected!");
-            let sql = 'INSERT INTO personaldetails '+ 'VALUES ('+"'"+req.query.first_name+ "'"+','+ "'"+req.query.last_name+ "'"+','+req.query.id+',' + "'"+req.query.city+ "'"+','+
+            let sql = 'INSERT INTO personal_details '+ 'VALUES ('+"'"+req.query.first_name+ "'"+','+ "'"+req.query.last_name+ "'"+','+req.query.id+',' + "'"+req.query.city+ "'"+','+
                 "'"+req.query.street+ "'"+','+req.query.House+',"'+req.query.date_of_birth+'",'+req.query.telephone+','+ req.query.mobile_phone+');';
             con.query(sql, function (err, result) {
                 if (err) throw err;
@@ -19,6 +25,12 @@ module.exports = (function() {
         });
     };
 
+    /**
+     * function that get personal details from the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getPersonalDetails(req, res) {
         con.getConnection(function(err,connection) {
             if (err) throw err;
@@ -33,23 +45,36 @@ module.exports = (function() {
         });
     }
 
+    /**
+     * function that add vaccine details to the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function addVaccinesDetails(req, res) {
         con.getConnection(function(err,connection) {
             if (err) throw err;
             console.log("Connected!");
-            // Check if ID exists in personaldetails table
-            let idSql = 'SELECT id FROM personaldetails WHERE id = ' + req.query.id + ';';
+            // Check if ID exists in personal_details table
+            let idSql = 'SELECT id FROM personal_details WHERE id = ' + req.query.id + ';';
             con.query(idSql, function(err, result) {
                 if (err) throw err;
                 if (result.length === 0) {
                     // If ID doesn't exist, send an error message and do not insert into vaccines_details table
-                    res.status(400).send('ID does not exist in personaldetails table');
+                    res.status(400).send('ID does not exist in personal_details table');
                 } else {
                     insertIntoVaccinesDetails(req,res,connection);
                 }
             });
         });
     }
+
+    /**
+     * function that insert the vaccine details to the database
+     * @param req
+     * @param res
+     * @param connection
+     */
     function insertIntoVaccinesDetails(req,res,connection) {
         // If ID exists, check count of existing records for the same ID
         let countSql = 'SELECT COUNT(*) as count FROM vaccines_details WHERE id = ' + req.query.id + ';';
@@ -70,6 +95,12 @@ module.exports = (function() {
         });
     }
 
+    /**
+     * function that get vaccine details from the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getVaccinesDetails(req, res){
         con.getConnection(function(err, connection) {
             if (err) throw err;
@@ -85,12 +116,18 @@ module.exports = (function() {
     }
 
 
+    /**
+     * function that add corona details of patient to the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function addCoronaPatient(req, res) {
         con.getConnection(function (err,connection) {
             if (err) throw err;
             console.log("Connected!");
-            // Check if the requested id exists in the personaldetails table
-            let checkSql = 'SELECT COUNT(*) as count FROM personaldetails WHERE id = ' + req.query.id + ';';
+            // Check if the requested id exists in the personal_details table
+            let checkSql = 'SELECT COUNT(*) as count FROM personal_details WHERE id = ' + req.query.id + ';';
             con.query(checkSql, function (err, result) {
                 if (err) throw err;
                 if (result[0].count === 0) {
@@ -102,8 +139,15 @@ module.exports = (function() {
             });
         });
     }
+
+    /**
+     * function that insert the corona details of patient to the database
+     * @param req
+     * @param res
+     * @param connection
+     */
     function insertIntoCoronaPatient(req,res,connection) {
-        // The id exists in the personaldetails table, proceed with inserting a new row in corona_patient table
+        // The id exists in the personal_details table, proceed with inserting a new row in corona_patient table
         let sql = 'SELECT id FROM corona_patient WHERE id = ' + req.query.id + ';';
         con.query(sql, function (err, result) {
             if (err) throw err;
@@ -121,14 +165,21 @@ module.exports = (function() {
             }
         });
     }
+
+    /**
+     * function that get all the details of patient from the 3 tables
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getDataOfPatient(req, res ){
         const id = req.params.id;
         const query = `SELECT * , DATE_FORMAT(positive_result_date, "%Y-%m-%d") AS positive_result_date,DATE_FORMAT(date_of_birth, "%Y-%m-%d") AS date_of_birth,
                               DATE_FORMAT(recovery_date, "%Y-%m-%d") AS recovery_date,DATE_FORMAT(vaccine_date, "%Y-%m-%d") AS vaccine_date
-                 FROM personaldetails
-                 LEFT JOIN corona_patient ON personaldetails.id = corona_patient.id
-                 LEFT JOIN vaccines_details ON personaldetails.id = vaccines_details.id
-                 WHERE personaldetails.id = ?`;
+                 FROM personal_details
+                 LEFT JOIN corona_patient ON personal_details.id = corona_patient.id
+                 LEFT JOIN vaccines_details ON personal_details.id = vaccines_details.id
+                 WHERE personal_details.id = ?`;
 
         con.query(query, [id], (error, results, fields) => {
             if (error) throw error;
@@ -140,6 +191,13 @@ module.exports = (function() {
             }
         });
     }
+
+    /**
+     * function that get corona details of patient from the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getCoronaPatient(req, res) {
         con.getConnection(function(err,connection) {
             if (err) throw err;
@@ -153,6 +211,13 @@ module.exports = (function() {
             });
         });
     }
+
+    /**
+     * function that get the num of the active patients in last month from the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getActivePatient(req, res) {
         con.getConnection(function(err, connection) {
             if (err) throw err;
@@ -168,13 +233,20 @@ module.exports = (function() {
             });
         });
     }
+
+    /**
+     * function that get the num of the members patients that unvaccinated from the database
+     * @param req
+     * @param res
+     * @returns {Promise<void>}
+     */
     async function getMembersNotVaccinated(req, res) {
         con.getConnection(function(err, connection) {
             if (err) throw err;
             console.log("Connected!");
             const query = `
                 SELECT COUNT(*) AS unvaccinated_count
-                FROM personaldetails pd
+                FROM personal_details pd
                 WHERE pd.id NOT IN (
                     SELECT DISTINCT id FROM vaccines_details
                 )

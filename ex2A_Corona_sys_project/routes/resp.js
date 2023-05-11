@@ -3,8 +3,8 @@ const router = express.Router();
 const detailsController = require('../controller/detailsController');
 
 
-router.post('/resAdd', detailsController.addPersonalDetails);
-router.get('/resUpdate', detailsController.getPersonalDetails);
+router.post('/personalDetailsAdd', detailsController.addPersonalDetails);
+router.get('/personalDetailsAdd', detailsController.getPersonalDetails);
 
 router.post('/vaccineDetailsAdd', detailsController.addVaccinesDetails);
 router.get('/vaccineDetailsGet', detailsController.getVaccinesDetails);
